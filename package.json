@@ -1,0 +1,30 @@
+{
+  "name": "@stellar-scaffold/ui",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm start",
+    "start": "concurrently -k -n api,app -c cyan,green \"npm run demo-api\" \"npm run start:app\"",
+    "start:app": "npm start --workspace app",
+    "build": "npm run build --workspace app",
+    "demo-api": "node --env-file=app/.env scripts/demo-api.mjs",
+    "lint": "npm run lint --workspaces --if-present",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check"
+  },
+  "workspaces": [
+    "app",
+    "app-lib",
+    "app-lib/clients/*",
+    "e2e"
+  ],
+  "dependencies": {
+    "@stellar/stellar-sdk": "^16.1.0"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5",
+    "prettier": "^3.8.3"
+  },
+  "prettier": "@theahaco/ts-config/prettier",
+  "packageManager": "npm@11.12.1"
+}
