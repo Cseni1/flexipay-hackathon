@@ -14,14 +14,10 @@ module.exports = async function handler(req, res) {
   if (req.method === "OPTIONS") return send(204, {})
   if (req.method !== "POST") return send(405, { ok: false, error: "Method not allowed" })
 
-  try {
-    let sdk
-    try {
-      sdk = require("@stellar/stellar-sdk")
-    } catch (e) {
-      return send(500, { ok: false, error: "SDK_REQUIRE_FAILED", detail: String(e && e.message || e) })
-    }
+  const trim = (v) => (typeof v === "string" ? v.trim() : v)
 
+  try {
+    const sdk = await import("@stellar/stellar-sdk")
     const {
       Address,
       BASE_FEE,
@@ -33,23 +29,23 @@ module.exports = async function handler(req, res) {
       rpc,
     } = sdk
 
-    const secret = process.env.EMPLOYER_SECRET
-    const contractId = process.env.PUBLIC_PAY_SHIFT_CONTRACT_ID
+    const secret = trim(process.env.EMPLOYER_SECRET)
+    const contractId = trim(process.env.PUBLIC_PAY_SHIFT_CONTRACT_ID)
     if (!secret) return send(500, { ok: false, error: "Missing EMPLOYER_SECRET" })
     if (!contractId) return send(500, { ok: false, error: "Missing PUBLIC_PAY_SHIFT_CONTRACT_ID" })
 
     const tokenId =
-      process.env.PUBLIC_NATIVE_TOKEN_CONTRACT_ID ||
+      trim(process.env.PUBLIC_NATIVE_TOKEN_CONTRACT_ID) ||
       "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"
     const employer =
-      process.env.PUBLIC_EMPLOYER_ADDRESS ||
+      trim(process.env.PUBLIC_EMPLOYER_ADDRESS) ||
       "GDNFGHPOIPM3RHL7NMQCXRAELEF6AVFJLLOFXM25DDN4ANXMMTU3LFZP"
     const worker =
-      process.env.PUBLIC_WORKER_ADDRESS ||
+      trim(process.env.PUBLIC_WORKER_ADDRESS) ||
       "GADUBNTO655LVGIRUH3SP7E4P5FRUL2TWWURNDYQOQ3KMPD3B72WYJHL"
     const rpcUrl =
-      process.env.PUBLIC_STELLAR_RPC_URL || "https://soroban-testnet.stellar.org"
-    const amount = BigInt(process.env.DEMO_AMOUNT_STROOPS || "10000000")
+      trim(process.env.PUBLIC_STELLAR_RPC_URL) || "https://soroban-testnet.stellar.org"
+    const amount = BigInt(trim(process.env.DEMO_AMOUNT_STROOPS) || "10000000")
 
     let body = req.body
     if (typeof body === "string") body = body ? JSON.parse(body) : {}
@@ -120,13 +116,12 @@ module.exports = async function handler(req, res) {
     const already =
       message.includes("Error(Contract, #1)") ||
       message.includes("AlreadyPaid") ||
-      JSON.stringify(e && e.response || e || {}).includes("#1")
+      JSON.stringify((e && e.response) || e || {}).includes("#1")
     return send(500, {
       ok: false,
       error: already
         ? "This shift was already paid on-chain (duplicate protection)."
         : message,
-      stack: process.env.VERCEL_ENV ? undefined : (e && e.stack),
       name: e && e.name,
     })
   }
