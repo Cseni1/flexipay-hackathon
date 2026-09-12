@@ -1,11 +1,7 @@
-/**
+﻿/**
  * Vercel serverless: Approve & Pay on Stellar Testnet.
  * Employer secret stays in EMPLOYER_SECRET (server env only) — never PUBLIC_*.
  */
-module.exports.config = {
-	maxDuration: 60,
-}
-
 const {
 	Address,
 	BASE_FEE,
@@ -37,7 +33,7 @@ function requireEnv(name) {
 }
 
 async function waitForTx(server, hash) {
-	for (let i = 0; i < 30; i++) {
+	for (let i = 0; i < 45; i++) {
 		const r = await server.getTransaction(hash)
 		if (r.status === "SUCCESS") return r
 		if (r.status === "FAILED") {
@@ -120,7 +116,7 @@ async function payShift(shiftId) {
 	}
 }
 
-module.exports = async function handler(req, res) {
+async function handler(req, res) {
 	if (req.method === "OPTIONS") {
 		json(res, 204, {})
 		return
@@ -154,3 +150,6 @@ module.exports = async function handler(req, res) {
 		})
 	}
 }
+
+module.exports = handler
+module.exports.config = { maxDuration: 60 }
