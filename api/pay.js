@@ -2,6 +2,10 @@
  * Vercel serverless: Approve & Pay on Stellar Testnet.
  * Employer secret stays in EMPLOYER_SECRET (server env only) — never PUBLIC_*.
  */
+module.exports.config = {
+	maxDuration: 60,
+}
+
 const {
 	Address,
 	BASE_FEE,
